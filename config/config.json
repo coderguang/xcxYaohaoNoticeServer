@@ -1,0 +1,13 @@
+{
+    "title":["guangzhou","shenzhen"],
+    "dbUrl":"dburl",
+    "dbPort":"3306",
+    "dbUser":"username",
+    "dbPwd":"user passwd",
+    "dbName":"dbname",
+    "dbTable":"db table anme",
+    "listenPort":"2000",
+    "smsKey":"aliyun sms key",
+    "smsSecret":"aliyun sms secret",
+    "SendSms":0
+}
