@@ -35,7 +35,7 @@ func doLogic(w http.ResponseWriter, r *http.Request) {
 	rawkeys := r.Form["key"][0]
 	keys := strings.Split(rawkeys, ",")
 	reqType := keys[0]
-	sglog.Debug("type=%s,keys:%s", reqType, keys)
+	sglog.Debug("type=%s,keys:%s,total:%s", reqType, keys, r.Form)
 	if reqType == "require" {
 		// ?key=require,title,token,type,code,phone,lefttime
 		paramSizeMin := 7

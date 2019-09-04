@@ -29,9 +29,9 @@ func InitConfig(configfile string) {
 	globalOpenidMap = new(yaohaoNoticeDef.SecureWxOpenid)
 	globalOpenidMap.Data = make(map[string](map[string]*yaohaoNoticeDef.SWxOpenid))
 
-	// for _, v := range globalCfg.Title {
-	// 	globalTokenMap.Data[v] = make(map[string]*yaohaoNoticeDef.SWxOpenid)
-	// }
+	for _, v := range globalCfg.Title {
+		globalOpenidMap.Data[v] = make(map[string]*yaohaoNoticeDef.SWxOpenid)
+	}
 
 	globalRequireTimes = 0
 }
@@ -192,10 +192,12 @@ func AddWxOpenid(title string, data *yaohaoNoticeDef.SWxOpenid) {
 			now := sgtime.New()
 			if now.GetTotalSecond()-vv.Time.GetTotalSecond() > 3600 {
 				delete(v, data.Code)
+				v[data.Code] = data
 			} else {
 				sglog.Error("duplicate ,title:%s,code is %s,old openid:%s,new openid:%s", title, data.Code, vv.Openid, data.Openid)
 			}
+		} else {
+			v[data.Code] = data
 		}
 	}
-	globalOpenidMap.Data[title][data.Code] = data
 }
