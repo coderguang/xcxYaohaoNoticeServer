@@ -5,6 +5,7 @@ import (
 	yaohaoNoticeDef "xcxYaohaoNoticeServer/src/define"
 
 	"github.com/coderguang/GameEngine_go/sgstring"
+	"github.com/coderguang/GameEngine_go/sgtime"
 
 	"github.com/coderguang/GameEngine_go/sglog"
 )
@@ -12,6 +13,7 @@ import (
 var globalCfg *yaohaoNoticeDef.Config
 var globalTokenMap *yaohaoNoticeDef.SecureSData
 var globalRequireMap *yaohaoNoticeDef.SecureSRequireData
+var globalOpenidMap *yaohaoNoticeDef.SecureWxOpenid
 
 var globalRequireTimes int
 
@@ -23,6 +25,13 @@ func InitConfig(configfile string) {
 
 	globalRequireMap = new(yaohaoNoticeDef.SecureSRequireData)
 	globalRequireMap.Data = make(map[string](map[string]*yaohaoNoticeDef.SRequireData))
+
+	globalOpenidMap = new(yaohaoNoticeDef.SecureWxOpenid)
+	globalOpenidMap.Data = make(map[string](map[string]*yaohaoNoticeDef.SWxOpenid))
+
+	// for _, v := range globalCfg.Title {
+	// 	globalTokenMap.Data[v] = make(map[string]*yaohaoNoticeDef.SWxOpenid)
+	// }
 
 	globalRequireTimes = 0
 }
@@ -155,4 +164,38 @@ func GetNeedNoticeData(title string) map[string]*yaohaoNoticeDef.SData {
 		return v
 	}
 	return nil
+}
+
+func GetWxOpenid(title string, code string) (bool, string) {
+	globalOpenidMap.Lock.RLock()
+	defer globalOpenidMap.Lock.RUnlock()
+
+	if v, ok := globalOpenidMap.Data[title]; ok {
+		if vv, ok := v[code]; ok {
+			now := sgtime.New()
+			if now.GetTotalSecond()-vv.Time.GetTotalSecond() > 3600 {
+				delete(v, code)
+				return false, ""
+			}
+			return true, vv.Openid
+		}
+	}
+	return false, ""
+}
+
+func AddWxOpenid(title string, data *yaohaoNoticeDef.SWxOpenid) {
+	globalOpenidMap.Lock.RLock()
+	defer globalOpenidMap.Lock.RUnlock()
+
+	if v, ok := globalOpenidMap.Data[title]; ok {
+		if vv, ok := v[data.Code]; ok {
+			now := sgtime.New()
+			if now.GetTotalSecond()-vv.Time.GetTotalSecond() > 3600 {
+				delete(v, data.Code)
+			} else {
+				sglog.Error("duplicate ,title:%s,code is %s,old openid:%s,new openid:%s", title, data.Code, vv.Openid, data.Openid)
+			}
+		}
+	}
+	globalOpenidMap.Data[title][data.Code] = data
 }

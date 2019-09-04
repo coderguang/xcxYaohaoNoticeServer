@@ -7,6 +7,8 @@ import (
 	yaohaoNoticeData "xcxYaohaoNoticeServer/src/data"
 	yaohaoNoticeDef "xcxYaohaoNoticeServer/src/define"
 
+	"github.com/coderguang/GameEngine_go/sgtime"
+
 	"github.com/coderguang/GameEngine_go/sglog"
 )
 
@@ -58,6 +60,15 @@ func doLogic(w http.ResponseWriter, r *http.Request) {
 		code := keys[index]
 		index++
 		phone := keys[index]
+
+		flag, openid := yaohaoNoticeData.GetWxOpenid(title, token)
+		if !flag {
+			w.Write([]byte(getErrorCodeStr(yaohaoNoticeDef.YAOHAO_NOTICE_ERR_TOKEN)))
+			sglog.Error("unknow openid require ,title:%s,token:%s", title, token)
+			return
+		}
+		token = openid
+
 		errcode, randomNum := RequireConfirmFromClient(title, token, cardType, code, phone, leftTime)
 		if errcode != yaohaoNoticeDef.YAOHAO_NOTICE_OK {
 			w.Write([]byte(getErrorCodeStr(errcode)))
@@ -79,6 +90,15 @@ func doLogic(w http.ResponseWriter, r *http.Request) {
 		title := keys[1]
 		token := keys[2]
 		randomcode := keys[3]
+
+		flag, openid := yaohaoNoticeData.GetWxOpenid(title, token)
+		if !flag {
+			w.Write([]byte(getErrorCodeStr(yaohaoNoticeDef.YAOHAO_NOTICE_ERR_TOKEN)))
+			sglog.Error("unknow openid require ,title:%s,token:%s", title, token)
+			return
+		}
+		token = openid
+
 		errcode := ConfireRequireFromClient(title, token, randomcode)
 		if errcode != yaohaoNoticeDef.YAOHAO_NOTICE_OK {
 			w.Write([]byte(getErrorCodeStr(errcode))) // not param keys
@@ -99,6 +119,24 @@ func doLogic(w http.ResponseWriter, r *http.Request) {
 		totalSize := keys[4]
 		datas := keys[5:len(keys)]
 		RecvDataFromYaoHaoServer(title, cardType, time, totalSize, datas)
+	} else if reqType == "openid" {
+		// data,title,time,cardType,len,detail
+		//?key = data, title, time,type, totalnum, data
+		if len(keys) < 4 {
+			w.Write([]byte(getErrorCodeStr(yaohaoNoticeDef.YAOHAO_NOTICE_ERR_OPEN_ID_PARAM_NUM))) // not param keys
+			sglog.Debug("openid not enough at least params")
+			return
+		}
+
+		openidData := new(yaohaoNoticeDef.SWxOpenid)
+		title := keys[1]
+		openidData.Code = keys[2]
+		openidData.Openid = keys[3]
+		openidData.Time = sgtime.New()
+
+		sglog.Info("receive openid,title:%s,code:%s,openid:%s", title, openidData.Code, openidData.Openid)
+
+		yaohaoNoticeData.AddWxOpenid(title, openidData)
 	} else {
 		w.Write([]byte(getErrorCodeStr(yaohaoNoticeDef.YAOHAO_NOTICE_ERR_HTTP_REQ_TYPE))) // not param keys
 		sglog.Debug("type error")

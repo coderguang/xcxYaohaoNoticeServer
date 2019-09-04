@@ -27,13 +27,6 @@ func AddNoticeRequire(title string, token string, code string, phone string, lef
 		return errcode
 	}
 
-	//check token
-
-	if !CheckTokenValid(title, token) {
-		sglog.Error("error token,title:%s,token:%s", title, token)
-		return yaohaoNoticeDef.YAOHAO_NOTICE_ERR_TOKEN
-	}
-
 	if !sgregex.AllNum(code) {
 		sglog.Error("error code,title:%s,code:%s", title, code)
 		return yaohaoNoticeDef.YAOHAO_NOTICE_ERR_CODE
@@ -63,10 +56,6 @@ func AddNoticeRequire(title string, token string, code string, phone string, lef
 	data.ShowMsg()
 
 	return yaohaoNoticeDef.YAOHAO_NOTICE_OK
-}
-
-func CheckTokenValid(title string, token string) bool {
-	return true
 }
 
 func CheckCardTypeValid(cardType int) bool {
@@ -110,13 +99,6 @@ func RequireConfirmFromClient(title string, token string, cardType int, code str
 				}
 			}
 		}
-	}
-
-	//check token
-
-	if !CheckTokenValid(title, token) {
-		sglog.Error("require error token,title:%s,token:%s", title, token)
-		return yaohaoNoticeDef.YAOHAO_NOTICE_ERR_TOKEN, randomCode
 	}
 
 	if !sgregex.AllNum(code) {

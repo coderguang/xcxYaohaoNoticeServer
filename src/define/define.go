@@ -54,6 +54,7 @@ const (
 	YAOHAO_NOTICE_ERR_YAOHAO_SERVER_DATA_SIZE_NOT_MATCH                          //27
 	YAOHAO_NOTICE_ERR_YAOHAO_SERVER_TIME_NOT_MATCH                               //28
 	YAOHAO_NOTICE_ERR_HTTP_REQ_CARD_TYPE                                         //29
+	YAOHAO_NOTICE_ERR_OPEN_ID_PARAM_NUM                                          //30
 )
 
 type YaoHaoNoticeRequireStatus int
@@ -169,4 +170,15 @@ type SMSData struct {
 	Message   string `json:"Message"`
 	RequestId string `json:"RequestId"`
 	Code      string `json:"Code"`
+}
+
+type SWxOpenid struct {
+	Code   string
+	Openid string
+	Time   *sgtime.DateTime
+}
+
+type SecureWxOpenid struct {
+	Data map[string](map[string]*SWxOpenid)
+	Lock sync.RWMutex
 }
