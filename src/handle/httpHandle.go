@@ -75,7 +75,11 @@ func doLogic(w http.ResponseWriter, r *http.Request) {
 			sglog.Debug("require sms error,final code=%d", errcode)
 			return
 		} else {
-			str := "{\"errcode\":0," + "\"randomCode\":\"" + randomNum + "\"}"
+			str := getErrorCodeStr(0)
+			if 0 == yaohaoNoticeData.GetSendSmsFlag() {
+				sglog.Info("send sms by config flag,this sms would't real send to phone %s,will return by http", phone)
+				str = "{\"errcode\":0," + "\"randomCode\":\"" + randomNum + "\"}"
+			}
 			w.Write([]byte(str)) // not param keys
 			sglog.Debug("require sms ok")
 			return
