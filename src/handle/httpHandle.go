@@ -178,8 +178,9 @@ func doLogic(w http.ResponseWriter, r *http.Request, chanFlag chan bool) {
 
 func (h *wx_xcx_yaohao_notice_handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	flag := make(chan bool)
-	doLogic(w, r, flag)
+	go doLogic(w, r, flag)
 	<-flag
+	close(flag)
 }
 
 func HttpNoticeServer(port string) {
