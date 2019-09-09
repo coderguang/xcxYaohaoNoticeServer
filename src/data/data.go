@@ -210,7 +210,6 @@ func ClearOpenidByTimer() {
 		{
 			sglog.Info("start to run clear openid data")
 			globalOpenidMap.Lock.Lock()
-			defer globalOpenidMap.Lock.Unlock()
 			now := sgtime.New()
 			for k, v := range globalOpenidMap.Data {
 				for kk, vv := range v {
@@ -220,6 +219,7 @@ func ClearOpenidByTimer() {
 					}
 				}
 			}
+			globalOpenidMap.Lock.Unlock()
 			sglog.Info("clear openid data complete")
 		}
 		nowTime := time.Now()
