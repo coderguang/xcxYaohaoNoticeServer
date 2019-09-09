@@ -1,8 +1,11 @@
 package yaohaoNoticeData
 
 import (
+	"time"
 	yaohaoNoticeConfig "xcxYaohaoNoticeServer/src/config"
 	yaohaoNoticeDef "xcxYaohaoNoticeServer/src/define"
+
+	"github.com/coderguang/GameEngine_go/sgthread"
 
 	"github.com/coderguang/GameEngine_go/sgstring"
 	"github.com/coderguang/GameEngine_go/sgtime"
@@ -199,5 +202,31 @@ func AddWxOpenid(title string, data *yaohaoNoticeDef.SWxOpenid) {
 		} else {
 			v[data.Code] = data
 		}
+	}
+}
+
+func ClearOpenidByTimer() {
+	for {
+		{
+			sglog.Info("start to run clear openid data")
+			globalOpenidMap.Lock.Lock()
+			defer globalOpenidMap.Lock.Unlock()
+			now := sgtime.New()
+			for k, v := range globalOpenidMap.Data {
+				for kk, vv := range v {
+					if now.GetTotalSecond()-vv.Time.GetTotalSecond() > 3600 {
+						sglog.Debug("delete openid data,title:%s ,code:%s,openid:%s", k, vv.Code, vv.Openid)
+						delete(v, kk)
+					}
+				}
+			}
+			sglog.Info("clear openid data complete")
+		}
+		nowTime := time.Now()
+		normalTime := time.Date(nowTime.Year(), nowTime.Month(), nowTime.Day(), 23, 59, 59, 0, nowTime.Location())
+		timeInt := normalTime.Sub(nowTime)
+		sleepTime := int(timeInt / time.Second)
+		sglog.Info("next clear timer will run after %d seconds in %s", sleepTime, normalTime.String())
+		sgthread.SleepBySecond(sleepTime)
 	}
 }

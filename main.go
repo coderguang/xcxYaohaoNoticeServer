@@ -74,6 +74,8 @@ func main() {
 
 	go yaohaoNoticeHandle.HttpNoticeServer(yaohaoNoticeData.GetListenPort())
 
+	go yaohaoNoticeData.ClearOpenidByTimer()
+
 	RegistCmd()
 
 	sgcmd.StartCmdWaitInputLoop()
