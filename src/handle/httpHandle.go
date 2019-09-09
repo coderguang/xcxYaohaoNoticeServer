@@ -124,8 +124,7 @@ func doLogic(w http.ResponseWriter, r *http.Request) {
 		datas := keys[5:len(keys)]
 		RecvDataFromYaoHaoServer(title, cardType, time, totalSize, datas)
 	} else if reqType == "openid" {
-		// data,title,time,cardType,len,detail
-		//?key = data, title, time,type, totalnum, data
+		//?key =openid,title,code,openid
 		if len(keys) < 4 {
 			w.Write([]byte(getErrorCodeStr(yaohaoNoticeDef.YAOHAO_NOTICE_ERR_OPEN_ID_PARAM_NUM))) // not param keys
 			sglog.Debug("openid not enough at least params")
@@ -141,6 +140,28 @@ func doLogic(w http.ResponseWriter, r *http.Request) {
 		sglog.Info("receive openid,title:%s,code:%s,openid:%s", title, openidData.Code, openidData.Openid)
 
 		yaohaoNoticeData.AddWxOpenid(title, openidData)
+	} else if reqType == "getData" {
+		//?key =getData,title,code
+		if len(keys) < 3 {
+			w.Write([]byte(getErrorCodeStr(yaohaoNoticeDef.YAOHAO_NOTICE_ERR_OPEN_ID_PARAM_NUM))) // not param keys
+			sglog.Debug("getData not enough at least params")
+			return
+		}
+		title := keys[1]
+		code := keys[2]
+
+		flag, sdata := yaohaoNoticeData.GetNoticeDataByTitleAndCode(title, code)
+		if flag {
+			w.Write([]byte(getErrorCodeStr(yaohaoNoticeDef.YAOHAO_NOTICE_ERR_NOT_BIND_DATA)))
+			sglog.Debug("not bind data before,title:%s,code:%s", title, code)
+			return
+		} else {
+			str := "{\"errcode\":0," + "\"code\":\"" + sdata.Code + ",\"phone\":\"" + sdata.Phone + "\"}"
+			w.Write([]byte(str))
+			sglog.Debug("find bind data,title:%s,Code:%s,phone:%s", title, sdata.Code, sdata.Phone)
+			return
+		}
+
 	} else {
 		w.Write([]byte(getErrorCodeStr(yaohaoNoticeDef.YAOHAO_NOTICE_ERR_HTTP_REQ_TYPE))) // not param keys
 		sglog.Debug("type error")

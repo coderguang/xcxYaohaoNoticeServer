@@ -55,6 +55,7 @@ const (
 	YAOHAO_NOTICE_ERR_YAOHAO_SERVER_TIME_NOT_MATCH                               //28
 	YAOHAO_NOTICE_ERR_HTTP_REQ_CARD_TYPE                                         //29
 	YAOHAO_NOTICE_ERR_OPEN_ID_PARAM_NUM                                          //30
+	YAOHAO_NOTICE_ERR_NOT_BIND_DATA                                              //31
 )
 
 type YaoHaoNoticeRequireStatus int

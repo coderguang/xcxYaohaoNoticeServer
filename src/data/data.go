@@ -230,3 +230,20 @@ func ClearOpenidByTimer() {
 		sgthread.SleepBySecond(sleepTime)
 	}
 }
+
+func GetNoticeDataByTitleAndCode(title string, code string) (bool, *yaohaoNoticeDef.SData) {
+	flag, openid := GetWxOpenid(title, code)
+	if !flag {
+		sglog.Error("can't find openid,title:%s,code:%s", title, code)
+		return false, nil
+	}
+	globalTokenMap.Lock.Lock()
+	defer globalTokenMap.Lock.Unlock()
+
+	if v, ok := globalTokenMap.Data[title]; ok {
+		if vv, ook := v[openid]; ook {
+			return true, vv
+		}
+	}
+	return false, nil
+}
