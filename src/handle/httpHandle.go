@@ -151,7 +151,7 @@ func doLogic(w http.ResponseWriter, r *http.Request) {
 		code := keys[2]
 
 		flag, sdata := yaohaoNoticeData.GetNoticeDataByTitleAndCode(title, code)
-		if flag {
+		if !flag {
 			w.Write([]byte(getErrorCodeStr(yaohaoNoticeDef.YAOHAO_NOTICE_ERR_NOT_BIND_DATA)))
 			sglog.Debug("not bind data before,title:%s,code:%s", title, code)
 			return
