@@ -21,7 +21,11 @@ func getErrorCodeStr(code yaohaoNoticeDef.YaoHaoNoticeError) string {
 	return str
 }
 
-func doLogic(w http.ResponseWriter, r *http.Request) {
+func doLogic(w http.ResponseWriter, r *http.Request, chanFlag chan bool) {
+
+	defer func() {
+		chanFlag <- true
+	}()
 
 	sglog.Info("get require from client,times=%d", yaohaoNoticeData.GetTotalRequireTimes())
 	r.ParseForm()
@@ -173,7 +177,9 @@ func doLogic(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *wx_xcx_yaohao_notice_handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	doLogic(w, r)
+	flag := make(chan bool)
+	doLogic(w, r, flag)
+	<-flag
 }
 
 func HttpNoticeServer(port string) {
