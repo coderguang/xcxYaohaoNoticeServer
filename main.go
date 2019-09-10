@@ -62,7 +62,7 @@ func main() {
 		return
 	}
 	configfile := os.Args[1]
-	sglog.Info("read global config from ", configfile)
+	sglog.Info("read global config from %s", configfile)
 	yaohaoNoticeData.InitConfig(configfile)
 
 	sglog.Info("start run yaohao notice program")
