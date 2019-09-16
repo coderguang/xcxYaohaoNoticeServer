@@ -160,9 +160,31 @@ func doLogic(w http.ResponseWriter, r *http.Request, chanFlag chan bool) {
 			sglog.Debug("not bind data before,title:%s,code:%s", title, code)
 			return
 		} else {
-			str := "{\"errcode\":0," + "\"code\":\"" + sdata.Code + ",\"phone\":\"" + sdata.Phone + "\"}"
+			str := "{\"errcode\":0," + "\"code\":\"" + sdata.Code + ",\"phone\":\"" + sdata.Phone + ",\"status\":\"" + sdata.Status + "\"}"
 			w.Write([]byte(str))
 			sglog.Debug("find bind data,title:%s,Code:%s,phone:%s", title, sdata.Code, sdata.Phone)
+			return
+		}
+
+	} else if reqType == "cancel" {
+		//?key =getData,title,code
+		if len(keys) < 3 {
+			w.Write([]byte(getErrorCodeStr(yaohaoNoticeDef.YAOHAO_NOTICE_ERR_OPEN_ID_PARAM_NUM))) // not param keys
+			sglog.Debug("cancel not enough at least params")
+			return
+		}
+		title := keys[1]
+		code := keys[2]
+
+		flag, sdata := yaohaoNoticeData.GetNoticeDataByTitleAndCode(title, code)
+		if !flag {
+			w.Write([]byte(getErrorCodeStr(yaohaoNoticeDef.YAOHAO_NOTICE_ERR_NOT_BIND_DATA)))
+			sglog.Debug("cancel not bind data before,title:%s,code:%s", title, code)
+			return
+		} else {
+			sdata.Status = yaohaoNoticeDef.YAOHAO_NOTICE_STATUS_CANCEL
+			w.Write([]byte(getErrorCodeStr(0)))
+			sglog.Debug("cancel ok! data,title:%s,Code:%s,phone:%s", title, sdata.Code, sdata.Phone)
 			return
 		}
 
