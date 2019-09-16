@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 	yaohaoNoticeData "xcxYaohaoNoticeServer/src/data"
+	yaohaoNoticeDb "xcxYaohaoNoticeServer/src/db"
 	yaohaoNoticeDef "xcxYaohaoNoticeServer/src/define"
 
 	"github.com/coderguang/GameEngine_go/sgtime"
@@ -183,6 +184,7 @@ func doLogic(w http.ResponseWriter, r *http.Request, chanFlag chan bool) {
 			return
 		} else {
 			sdata.Status = yaohaoNoticeDef.YAOHAO_NOTICE_STATUS_CANCEL
+			yaohaoNoticeDb.InsertOrUpdateData(sdata)
 			w.Write([]byte(getErrorCodeStr(0)))
 			sglog.Debug("cancel ok! data,title:%s,Code:%s,phone:%s", title, sdata.Code, sdata.Phone)
 			return
