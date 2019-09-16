@@ -183,10 +183,17 @@ func doLogic(w http.ResponseWriter, r *http.Request, chanFlag chan bool) {
 			sglog.Debug("cancel not bind data before,title:%s,code:%s", title, code)
 			return
 		} else {
-			sdata.Status = yaohaoNoticeDef.YAOHAO_NOTICE_STATUS_CANCEL
-			yaohaoNoticeDb.InsertOrUpdateData(sdata)
-			w.Write([]byte(getErrorCodeStr(0)))
-			sglog.Debug("cancel ok! data,title:%s,Code:%s,phone:%s", title, sdata.Code, sdata.Phone)
+			if sdata.Status != yaohaoNoticeDef.YAOHAO_NOTICE_STATUS_NORMAL {
+				str := "{\"errcode\":" + strconv.Itoa(int(yaohaoNoticeDef.YAOHAO_NOTICE_ERR_STATUS_NOT_NORMAL)) + ",\"status\":\"" + sdata.Status + "\"}"
+				w.Write([]byte(str))
+				sglog.Debug("find bind data,title:%s,Code:%s,phone:%s", title, sdata.Code, sdata.Phone)
+
+			} else {
+				sdata.Status = yaohaoNoticeDef.YAOHAO_NOTICE_STATUS_CANCEL
+				yaohaoNoticeDb.InsertOrUpdateData(sdata)
+				w.Write([]byte(getErrorCodeStr(0)))
+				sglog.Debug("cancel ok! data,title:%s,Code:%s,phone:%s", title, sdata.Code, sdata.Phone)
+			}
 			return
 		}
 

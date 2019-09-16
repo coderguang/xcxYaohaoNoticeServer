@@ -56,6 +56,7 @@ const (
 	YAOHAO_NOTICE_ERR_HTTP_REQ_CARD_TYPE                                         //29
 	YAOHAO_NOTICE_ERR_OPEN_ID_PARAM_NUM                                          //30
 	YAOHAO_NOTICE_ERR_NOT_BIND_DATA                                              //31
+	YAOHAO_NOTICE_ERR_STATUS_NOT_NORMAL                                          //32
 )
 
 type YaoHaoNoticeRequireStatus int
