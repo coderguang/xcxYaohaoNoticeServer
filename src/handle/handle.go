@@ -138,6 +138,9 @@ func RequireConfirmFromClient(title string, token string, cardType int, code str
 			}
 		} else {
 			//有数据变更
+			if now.GetTotalSecond()-oldData.RequireDt.GetTotalSecond() <= int64(yaohaoNoticeDef.YAOHAO_NOTICE_SMS_TIME_LIMIT) {
+				return yaohaoNoticeDef.YAOHAO_NOTICE_ERR_REQUIRE_HAD_LOCK, randomCode
+			}
 			if now.GetTotalSecond()-oldData.RequireDt.GetTotalSecond() <= int64(yaohaoNoticeDef.YAOHAO_NOTICE_REQUIRE_UNLOCK_TIME) {
 				if oldData.RequireTimes >= yaohaoNoticeDef.YAOHAO_NOTICE_REQUIRE_MAX_TIMES {
 					return yaohaoNoticeDef.YAOHAO_NOTICE_ERR_REQUIRE_HAD_LOCK, randomCode

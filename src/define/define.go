@@ -7,6 +7,7 @@ import (
 	"github.com/coderguang/GameEngine_go/sgtime"
 )
 
+const YAOHAO_NOTICE_SMS_TIME_LIMIT int = 60
 const YAOHAO_NOTICE_REQUIRE_VALID_TIME int = 300
 const YAOHAO_NOTICE_REQUIRE_UNLOCK_TIME int = 1800
 const YAOHAO_NOTICE_CONFIRM_TIMES int = 3
