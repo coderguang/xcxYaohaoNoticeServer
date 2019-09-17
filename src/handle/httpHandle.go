@@ -180,7 +180,7 @@ func doLogic(w http.ResponseWriter, r *http.Request, chanFlag chan bool) {
 			return
 		} else {
 			timestr := sdata.EndDt.YearString() + "/" + sdata.EndDt.MonthString() + "/" + sdata.EndDt.DayString()
-			str := "{\"errcode\":0," + "\"code\":\"" + sdata.Code + ",\"phone\":\"" + sdata.Phone + ",\"time\":\"" + timestr + "\",\"status\":\"" + sdata.Status + "\"}"
+			str := "{\"errcode\":0," + "\"code\":\"" + sdata.Code + "\",\"phone\":\"" + sdata.Phone + "\",\"time\":\"" + timestr + "\",\"status\":" + sdata.Status + "}"
 			w.Write([]byte(str))
 			sglog.Debug("find bind data,title:%s,Code:%s,phone:%s", title, sdata.Code, sdata.Phone)
 			return
