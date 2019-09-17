@@ -179,7 +179,7 @@ func doLogic(w http.ResponseWriter, r *http.Request, chanFlag chan bool) {
 			sglog.Debug("not bind data before,title:%s,code:%s", title, code)
 			return
 		} else {
-			str := "{\"errcode\":0," + "\"code\":\"" + sdata.Code + ",\"phone\":\"" + sdata.Phone + ",\"status\":\"" + sdata.Status + "\"}"
+			str := "{\"errcode\":0," + "\"code\":\"" + sdata.Code + ",\"phone\":\"" + sdata.Phone + ",\"time\":\"" + sdata.EndDt.NormalString() + "\",\"status\":\"" + sdata.Status + "\"}"
 			w.Write([]byte(str))
 			sglog.Debug("find bind data,title:%s,Code:%s,phone:%s", title, sdata.Code, sdata.Phone)
 			return
