@@ -157,5 +157,5 @@ func LoadNoticeRequireDataFromDb() {
 }
 
 func InsertOrUpdateRequireData(data *yaohaoNoticeDef.SNoticeRequireData) {
-	globalmysqlStmt.Exec(data.Openid, data.Title, data.Name, data.RequireTimes, data.FinalLogin.NormalString(), data.ShareTimes, data.Desc)
+	globalmysqlRequireStmt.Exec(data.Openid, data.Title, data.Name, data.RequireTimes, data.FinalLogin.NormalString(), data.ShareTimes, data.Desc)
 }
