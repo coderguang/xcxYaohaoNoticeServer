@@ -163,6 +163,17 @@ func GetRequireData(title string, token string) *yaohaoNoticeDef.SRequireData {
 	return nil
 }
 
+func RemoveRequireData(title string, token string) {
+	globalRequireMap.Lock.Lock()
+	defer globalRequireMap.Lock.Unlock()
+
+	if v, ok := globalRequireMap.Data[title]; ok {
+		if _, okex := v[token]; okex {
+			delete(v, token)
+		}
+	}
+}
+
 func GetSendSmsFlag() int {
 	return globalCfg.SendSms
 }

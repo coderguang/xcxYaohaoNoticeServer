@@ -278,7 +278,7 @@ func ConfireRequireFromClient(title string, token string, randomCode string) yao
 		yaohaoNoticeData.AddNoticeData(noticeData)
 		yaohaoNoticeDb.InsertOrUpdateData(noticeData)
 	}
-
+	yaohaoNoticeData.RemoveRequireData(title, token)
 	return yaohaoNoticeDef.YAOHAO_NOTICE_OK
 }
 
