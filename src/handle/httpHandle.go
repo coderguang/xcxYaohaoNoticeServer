@@ -153,7 +153,7 @@ func doLogic(w http.ResponseWriter, r *http.Request, chanFlag chan bool) {
 			requireData = new(yaohaoNoticeDef.SNoticeRequireData)
 			requireData.Openid = openidData.Openid
 			requireData.Title = title
-			requireData.RequireTimes = 1
+			requireData.RequireTimes = 0
 			requireData.ShareTimes = 0
 			requireData.Desc = sgtime.New().NormalString()
 			requireData.Name = openidData.Code
