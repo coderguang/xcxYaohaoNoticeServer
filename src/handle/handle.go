@@ -133,7 +133,6 @@ func RequireConfirmFromClient(title string, token string, cardType int, code str
 				}
 			} else {
 				oldData.RequireTimes = 0 //reset
-				oldData.RequireDt = now
 				oldData.AnswerTimes = 0
 			}
 		} else {
@@ -147,11 +146,11 @@ func RequireConfirmFromClient(title string, token string, cardType int, code str
 				}
 			} else {
 				oldData.RequireTimes = 0
-				oldData.RequireDt = now
 				oldData.AnswerTimes = 0
 			}
 		}
 
+		oldData.RequireDt = now
 		oldData.Status = int(yaohaoNoticeDef.YAOHAO_NOTICE_ERR_REQUIRE_WAIT_ANSWER)
 		oldData.Token = token
 		oldData.Code = code
