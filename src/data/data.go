@@ -17,6 +17,7 @@ var globalCfg *yaohaoNoticeDef.Config
 var globalTokenMap *yaohaoNoticeDef.SecureSData
 var globalRequireMap *yaohaoNoticeDef.SecureSRequireData
 var globalOpenidMap *yaohaoNoticeDef.SecureWxOpenid
+var globalNoticeRequireMap *yaohaoNoticeDef.SecureNoticeRequire
 
 var globalRequireTimes int
 
@@ -37,6 +38,14 @@ func InitConfig(configfile string) {
 	}
 
 	globalRequireTimes = 0
+
+	globalNoticeRequireMap = new(yaohaoNoticeDef.SecureNoticeRequire)
+	globalNoticeRequireMap.MapData = make(map[string](map[string]*yaohaoNoticeDef.SNoticeRequireData))
+
+	for _, v := range globalCfg.Title {
+		globalNoticeRequireMap.MapData[v] = make(map[string]*yaohaoNoticeDef.SNoticeRequireData)
+	}
+
 }
 
 func GetTotalRequireTimes() int {
@@ -85,6 +94,10 @@ func addNoticeDataByToken(data *yaohaoNoticeDef.SData) bool {
 
 func GetTableName() string {
 	return globalCfg.DbTable
+}
+
+func GetRequireDataTableName() string {
+	return globalCfg.DbTable + "_require_data"
 }
 
 func GetListenPort() string {
@@ -212,6 +225,7 @@ func ClearOpenidByTimer() {
 			globalOpenidMap.Lock.Lock()
 			now := sgtime.New()
 			for k, v := range globalOpenidMap.Data {
+				sglog.Debug("delete openid data by timer,title:%s ,size:%d", k, len(v))
 				for kk, vv := range v {
 					if now.GetTotalSecond()-vv.Time.GetTotalSecond() > 3600 {
 						sglog.Debug("delete openid data,title:%s ,code:%s,openid:%s", k, vv.Code, vv.Openid)
@@ -246,4 +260,29 @@ func GetNoticeDataByTitleAndCode(title string, code string) (bool, *yaohaoNotice
 		}
 	}
 	return false, nil
+}
+
+func AddOrUpdateNoticeRequireData(data *yaohaoNoticeDef.SNoticeRequireData) {
+	globalNoticeRequireMap.Lock.Lock()
+	defer globalNoticeRequireMap.Lock.Unlock()
+
+	if v, ok := globalNoticeRequireMap.MapData[data.Title]; ok {
+		v[data.Openid] = data
+	} else {
+		tmp := make(map[string]*yaohaoNoticeDef.SNoticeRequireData)
+		tmp[data.Openid] = data
+		globalNoticeRequireMap.MapData[data.Title] = tmp
+	}
+}
+
+func GetNoticeRequireData(title string, openid string) *yaohaoNoticeDef.SNoticeRequireData {
+	globalNoticeRequireMap.Lock.Lock()
+	defer globalNoticeRequireMap.Lock.Unlock()
+
+	if v, ok := globalNoticeRequireMap.MapData[title]; ok {
+		if vv, ook := v[openid]; ook {
+			return vv
+		}
+	}
+	return nil
 }

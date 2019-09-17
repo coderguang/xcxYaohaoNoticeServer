@@ -71,6 +71,7 @@ func main() {
 	yaohaoNoticeDb.InitDbConnection(yaohaoNoticeData.GetDbConnectionData())
 
 	yaohaoNoticeDb.LoadNoticeDataFromDb()
+	yaohaoNoticeDb.LoadNoticeRequireDataFromDb()
 
 	go yaohaoNoticeHandle.HttpNoticeServer(yaohaoNoticeData.GetListenPort())
 

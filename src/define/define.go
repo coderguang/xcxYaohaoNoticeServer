@@ -185,3 +185,18 @@ type SecureWxOpenid struct {
 	Data map[string](map[string]*SWxOpenid)
 	Lock sync.RWMutex
 }
+
+type SNoticeRequireData struct {
+	Openid       string
+	Name         string
+	Title        string
+	RequireTimes int
+	FinalLogin   *sgtime.DateTime
+	ShareTimes   int
+	Desc         string
+}
+
+type SecureNoticeRequire struct {
+	MapData map[string](map[string]*SNoticeRequireData)
+	Lock    sync.RWMutex
+}
