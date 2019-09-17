@@ -43,6 +43,13 @@ func doLogic(w http.ResponseWriter, r *http.Request, chanFlag chan bool) {
 	sglog.Debug("type=%s,keys:%s,total:%s", reqType, keys, r.Form)
 	if reqType == "require" {
 		// ?key=require,title,token,type,code,phone,lefttime
+
+		if 0 == yaohaoNoticeData.GetSendSmsFlag() {
+			w.Write([]byte(getErrorCodeStr(yaohaoNoticeDef.YAOHAO_NOTICE_ERR_SMS_SERVER_CLOSE))) // not param keys
+			sglog.Debug("sms server close")
+			return
+		}
+
 		paramSizeMin := 7
 		if len(keys) < paramSizeMin {
 			w.Write([]byte(getErrorCodeStr(yaohaoNoticeDef.YAOHAO_NOTICE_ERR_HTTP_PARAM_NUM))) // not param keys
