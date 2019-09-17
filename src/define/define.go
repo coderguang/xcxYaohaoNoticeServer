@@ -58,6 +58,7 @@ const (
 	YAOHAO_NOTICE_ERR_OPEN_ID_PARAM_NUM                                          //30
 	YAOHAO_NOTICE_ERR_NOT_BIND_DATA                                              //31
 	YAOHAO_NOTICE_ERR_STATUS_NOT_NORMAL                                          //32
+	YAOHAO_NOTICE_ERR_SMS_SERVER_CLOSE                                           //33
 )
 
 type YaoHaoNoticeRequireStatus int
