@@ -142,7 +142,7 @@ func LoadNoticeRequireDataFromDb() {
 					data.FinalLogin.Parse(fieldValue, sgtime.FORMAT_TIME_NORMAL)
 				case "share_times":
 					data.ShareTimes, _ = strconv.Atoi(fieldValue)
-				case "desc":
+				case "tips":
 					data.Desc = fieldValue
 				}
 			}
