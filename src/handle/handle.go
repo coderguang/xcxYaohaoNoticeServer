@@ -170,6 +170,14 @@ func RequireConfirmFromClient(title string, token string, cardType int, code str
 			}
 		}
 
+		tmpRandomCode := sgstring.RandNumStringRunes(yaohaoNoticeDef.YAOHAO_NOTICE_RANDOM_NUM_LENGTH)
+
+		smsCode := yaohaoNoticeSms.SendConfirmMsg(phone, tmpRandomCode)
+		//should check sms send status first
+		if yaohaoNoticeDef.YAOHAO_NOTICE_OK != smsCode {
+			return smsCode, randomCode
+		}
+
 		oldData.RequireDt = now
 		oldData.Status = int(yaohaoNoticeDef.YAOHAO_NOTICE_ERR_REQUIRE_WAIT_ANSWER)
 		oldData.Token = token
@@ -177,16 +185,10 @@ func RequireConfirmFromClient(title string, token string, cardType int, code str
 		oldData.CardType = cardType
 		oldData.Phone = phone
 		oldData.LeftTime = lefttime
-		oldData.RandomNum = sgstring.RandNumStringRunes(yaohaoNoticeDef.YAOHAO_NOTICE_RANDOM_NUM_LENGTH)
+		oldData.RandomNum = tmpRandomCode
 		oldData.RequireTimes++
 
 		yaohaoNoticeData.AddOrUpdateRequireData(oldData)
-
-		smsCode := yaohaoNoticeSms.SendConfirmMsg(oldData.Phone, oldData.RandomNum)
-
-		if yaohaoNoticeDef.YAOHAO_NOTICE_OK != smsCode {
-			return smsCode, randomCode
-		}
 	} else {
 
 		//针对绑定后取消的限制
@@ -194,6 +196,14 @@ func RequireConfirmFromClient(title string, token string, cardType int, code str
 		if !yaohaoNoticeData.CanGetRequire(token) {
 			sglog.Info("title:%s,token:%s,require too fast,limit it", title, token)
 			return yaohaoNoticeDef.YAOHAO_NOTICE_ERR_SMS_CLIENT, randomCode
+		}
+
+		tmpRandomCode := sgstring.RandNumStringRunes(yaohaoNoticeDef.YAOHAO_NOTICE_RANDOM_NUM_LENGTH)
+
+		smsCode := yaohaoNoticeSms.SendConfirmMsg(phone, tmpRandomCode)
+
+		if yaohaoNoticeDef.YAOHAO_NOTICE_OK != smsCode {
+			return smsCode, randomCode
 		}
 
 		newRequireData := new(yaohaoNoticeDef.SRequireData)
@@ -206,17 +216,11 @@ func RequireConfirmFromClient(title string, token string, cardType int, code str
 		newRequireData.Code = code
 		newRequireData.Phone = phone
 		newRequireData.LeftTime = lefttime
-		newRequireData.RandomNum = sgstring.RandNumStringRunes(yaohaoNoticeDef.YAOHAO_NOTICE_RANDOM_NUM_LENGTH)
+		newRequireData.RandomNum = tmpRandomCode
 		newRequireData.RequireTimes = 0
 
 		randomCode = newRequireData.RandomNum
 		yaohaoNoticeData.AddOrUpdateRequireData(newRequireData)
-
-		smsCode := yaohaoNoticeSms.SendConfirmMsg(newRequireData.Phone, newRequireData.RandomNum)
-
-		if yaohaoNoticeDef.YAOHAO_NOTICE_OK != smsCode {
-			return smsCode, randomCode
-		}
 	}
 	yaohaoNoticeData.AddRequireTimeLimits(token)
 	return yaohaoNoticeDef.YAOHAO_NOTICE_OK, randomCode
