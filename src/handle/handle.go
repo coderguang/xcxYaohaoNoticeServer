@@ -193,7 +193,7 @@ func RequireConfirmFromClient(title string, token string, cardType int, code str
 
 		if !yaohaoNoticeData.CanGetRequire(token) {
 			sglog.Info("title:%s,token:%s,require too fast,limit it", title, token)
-			return yaohaoNoticeDef.YAOHAO_NOTICE_ERR_TITLE, randomCode
+			return yaohaoNoticeDef.YAOHAO_NOTICE_ERR_SMS_CLIENT, randomCode
 		}
 
 		newRequireData := new(yaohaoNoticeDef.SRequireData)
