@@ -62,6 +62,20 @@ func CheckCardTypeValid(cardType int) bool {
 	return 1 == cardType || 2 == cardType
 }
 
+func CheckCodeValid(title string, code string) bool {
+	switch title {
+	case "guangzhou":
+		if !sgregex.AllNum(code) {
+			return false
+		}
+		if len(code) != 13 {
+			return false
+		}
+		return true
+	}
+	return false
+}
+
 //请求验证下发
 func RequireConfirmFromClient(title string, token string, cardType int, code string, phone string, lefttime int) (yaohaoNoticeDef.YaoHaoNoticeError, string) {
 	randomCode := ""
@@ -71,6 +85,16 @@ func RequireConfirmFromClient(title string, token string, cardType int, code str
 
 	if !CheckCardTypeValid(cardType) {
 		return yaohaoNoticeDef.YAOHAO_NOTICE_ERR_HTTP_REQ_CARD_TYPE, randomCode
+	}
+
+	if !CheckCodeValid(title, code) {
+		sglog.Error("require error code,title:%s,code:%s", title, code)
+		return yaohaoNoticeDef.YAOHAO_NOTICE_ERR_CODE, randomCode
+	}
+
+	if !sgregex.CNMobile(phone) {
+		sglog.Error("require error phone,title:%s,phone:%s", title, phone)
+		return yaohaoNoticeDef.YAOHAO_NOTICE_ERR_PHONE, randomCode
 	}
 
 	now := sgtime.New()
@@ -99,15 +123,6 @@ func RequireConfirmFromClient(title string, token string, cardType int, code str
 				}
 			}
 		}
-	}
-
-	if !sgregex.AllNum(code) {
-		sglog.Error("require error code,title:%s,code:%s", title, code)
-		return yaohaoNoticeDef.YAOHAO_NOTICE_ERR_CODE, randomCode
-	}
-	if !sgregex.CNMobile(phone) {
-		sglog.Error("require error phone,title:%s,phone:%s", title, phone)
-		return yaohaoNoticeDef.YAOHAO_NOTICE_ERR_PHONE, randomCode
 	}
 
 	oldData := yaohaoNoticeData.GetRequireData(title, token)
@@ -167,8 +182,15 @@ func RequireConfirmFromClient(title string, token string, cardType int, code str
 		if yaohaoNoticeDef.YAOHAO_NOTICE_OK != smsCode {
 			return smsCode, randomCode
 		}
-
 	} else {
+
+		//针对绑定后取消的限制
+
+		if !yaohaoNoticeData.CanGetRequire(token) {
+			sglog.Info("title:%s,token:%s,require too fast,limit it", title, token)
+			return yaohaoNoticeDef.YAOHAO_NOTICE_ERR_TITLE, randomCode
+		}
+
 		newRequireData := new(yaohaoNoticeDef.SRequireData)
 		newRequireData.Title = title
 		newRequireData.Status = int(yaohaoNoticeDef.YAOHAO_NOTICE_ERR_REQUIRE_WAIT_ANSWER)
@@ -190,9 +212,8 @@ func RequireConfirmFromClient(title string, token string, cardType int, code str
 		if yaohaoNoticeDef.YAOHAO_NOTICE_OK != smsCode {
 			return smsCode, randomCode
 		}
-
 	}
-
+	yaohaoNoticeData.AddRequireTimeLimits(token)
 	return yaohaoNoticeDef.YAOHAO_NOTICE_OK, randomCode
 }
 
@@ -240,7 +261,12 @@ func ConfireRequireFromClient(title string, token string, randomCode string) yao
 				return yaohaoNoticeDef.YAOHAO_NOTICE_ERR_PHONE_STILL_VALID
 			}
 		} else {
+
 			//旧数据已过期,更改数据
+
+			yaohaoNoticeData.DelPhoneBind(existData.Phone)
+			yaohaoNoticeData.AddPhoneBind(oldData.Phone)
+
 			existData.Code = oldData.Code
 			existData.Phone = oldData.Phone
 			firstOfMonth := sgtime.Date(now.Year(), now.Month(), 0, 0, 0, 0, 0, now.Location())
@@ -277,7 +303,7 @@ func ConfireRequireFromClient(title string, token string, randomCode string) yao
 		yaohaoNoticeData.AddNoticeData(noticeData)
 		yaohaoNoticeDb.InsertOrUpdateData(noticeData)
 	}
-	//yaohaoNoticeData.RemoveRequireData(title, token) //don't remove
+	yaohaoNoticeData.RemoveRequireData(title, token)
 	return yaohaoNoticeDef.YAOHAO_NOTICE_OK
 }
 
@@ -336,6 +362,7 @@ func RecvDataFromYaoHaoServer(title string, cardType int, timestr string, totalS
 			v.NoticeTimes++
 			if v.EndDt.Before(nextMonth) {
 				v.Status = yaohaoNoticeDef.YAOHAO_NOTICE_STATUS_TIME_OUT
+				yaohaoNoticeData.DelPhoneBind(v.Phone)
 			}
 
 			if _, luckFlag := luckBoys[v.Code]; luckFlag {

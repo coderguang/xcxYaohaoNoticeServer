@@ -8,11 +8,13 @@ import (
 )
 
 const YAOHAO_NOTICE_SMS_TIME_LIMIT int = 60
+const YAOHAO_NOTICE_SMS_TIME_LIMIT_30 int = 1800
 const YAOHAO_NOTICE_REQUIRE_VALID_TIME int = 300
 const YAOHAO_NOTICE_REQUIRE_UNLOCK_TIME int = 1800
 const YAOHAO_NOTICE_CONFIRM_TIMES int = 3
 const YAOHAO_NOTICE_RANDOM_NUM_LENGTH int = 4
 const YAOHAO_NOTICE_REQUIRE_MAX_TIMES int = 3
+const YAOHAO_NOTICE_PHONE_CAN_BIND_TOKEN_MAX int = 3
 
 const (
 	YAOHAO_NOTICE_STATUS_NORMAL                     = "0"
@@ -199,5 +201,21 @@ type SNoticeRequireData struct {
 
 type SecureNoticeRequire struct {
 	MapData map[string](map[string]*SNoticeRequireData)
+	Lock    sync.RWMutex
+}
+
+type SRequireLimit struct {
+	RequireTimes  int
+	RequireDt     *sgtime.DateTime
+	LastRequireDt *sgtime.DateTime
+}
+
+type SecureRequireLimit struct {
+	MapData map[string]*SRequireLimit
+	Lock    sync.RWMutex
+}
+
+type SecurePhoneLimit struct {
+	MapData map[string]int
 	Lock    sync.RWMutex
 }

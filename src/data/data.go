@@ -18,6 +18,8 @@ var globalTokenMap *yaohaoNoticeDef.SecureSData
 var globalRequireMap *yaohaoNoticeDef.SecureSRequireData
 var globalOpenidMap *yaohaoNoticeDef.SecureWxOpenid
 var globalNoticeRequireMap *yaohaoNoticeDef.SecureNoticeRequire
+var globalRequireLimit *yaohaoNoticeDef.SecureRequireLimit
+var globalPhoneLimit *yaohaoNoticeDef.SecurePhoneLimit
 
 var globalRequireTimes int
 
@@ -45,6 +47,12 @@ func InitConfig(configfile string) {
 	for _, v := range globalCfg.Title {
 		globalNoticeRequireMap.MapData[v] = make(map[string]*yaohaoNoticeDef.SNoticeRequireData)
 	}
+
+	globalRequireLimit = new(yaohaoNoticeDef.SecureRequireLimit)
+	globalRequireLimit.MapData = make(map[string]*yaohaoNoticeDef.SRequireLimit)
+
+	globalPhoneLimit = new(yaohaoNoticeDef.SecurePhoneLimit)
+	globalPhoneLimit.MapData = make(map[string]int)
 
 }
 
@@ -89,6 +97,9 @@ func addNoticeDataByToken(data *yaohaoNoticeDef.SData) bool {
 		tmp[keyData] = data
 		globalTokenMap.Data[data.Title] = tmp
 	}
+
+	AddPhoneBind(data.Phone)
+
 	return true
 }
 
@@ -296,4 +307,75 @@ func GetNoticeRequireData(title string, openid string) *yaohaoNoticeDef.SNoticeR
 		}
 	}
 	return nil
+}
+
+func AddRequireTimeLimits(openid string) {
+	globalRequireLimit.Lock.Lock()
+	defer globalRequireLimit.Lock.Unlock()
+	now := sgtime.New()
+	if v, ok := globalRequireLimit.MapData[openid]; ok {
+		if now.GetTotalSecond()-v.RequireDt.GetTotalSecond() >= int64(yaohaoNoticeDef.YAOHAO_NOTICE_SMS_TIME_LIMIT_30) {
+			v.RequireTimes = 1
+			v.RequireDt = now
+		} else {
+			v.RequireTimes++
+		}
+		v.LastRequireDt = now
+	} else {
+		newData := new(yaohaoNoticeDef.SRequireLimit)
+		newData.RequireTimes = 1
+		newData.RequireDt = now
+		newData.LastRequireDt = now
+		globalRequireLimit.MapData[openid] = newData
+	}
+}
+
+func CanGetRequire(openid string) bool {
+	globalRequireLimit.Lock.Lock()
+	defer globalRequireLimit.Lock.Unlock()
+	now := sgtime.New()
+	if v, ok := globalRequireLimit.MapData[openid]; ok {
+		if now.GetTotalSecond()-v.LastRequireDt.GetTotalSecond() <= int64(yaohaoNoticeDef.YAOHAO_NOTICE_SMS_TIME_LIMIT) {
+			return false
+		} else if now.GetTotalSecond()-v.LastRequireDt.GetTotalSecond() <= int64(yaohaoNoticeDef.YAOHAO_NOTICE_SMS_TIME_LIMIT_30) {
+			if v.RequireTimes >= yaohaoNoticeDef.YAOHAO_NOTICE_REQUIRE_MAX_TIMES {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func AddPhoneBind(phone string) {
+	globalPhoneLimit.Lock.Lock()
+	defer globalPhoneLimit.Lock.Unlock()
+	if v, ok := globalPhoneLimit.MapData[phone]; ok {
+		v++
+	} else {
+		globalPhoneLimit.MapData[phone] = 1
+	}
+}
+
+func DelPhoneBind(phone string) {
+	globalPhoneLimit.Lock.Lock()
+	defer globalPhoneLimit.Lock.Unlock()
+	if v, ok := globalPhoneLimit.MapData[phone]; ok {
+		v--
+		if 0 == v {
+			delete(globalPhoneLimit.MapData, phone)
+		}
+	} else {
+		sglog.Error("try to delete unbind phone,phon:%s", phone)
+	}
+}
+
+func CanBindPhone(phone string) bool {
+	globalPhoneLimit.Lock.Lock()
+	defer globalPhoneLimit.Lock.Unlock()
+	if v, ok := globalPhoneLimit.MapData[phone]; ok {
+		if v >= yaohaoNoticeDef.YAOHAO_NOTICE_PHONE_CAN_BIND_TOKEN_MAX {
+			return false
+		}
+	}
+	return true
 }

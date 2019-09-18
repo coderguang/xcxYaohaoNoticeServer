@@ -215,6 +215,7 @@ func doLogic(w http.ResponseWriter, r *http.Request, chanFlag chan bool) {
 				sglog.Debug("find bind data,title:%s,Code:%s,phone:%s", title, sdata.Code, sdata.Phone)
 
 			} else {
+				yaohaoNoticeData.DelPhoneBind(sdata.Phone)
 				sdata.Status = yaohaoNoticeDef.YAOHAO_NOTICE_STATUS_CANCEL
 				yaohaoNoticeDb.InsertOrUpdateData(sdata)
 				w.Write([]byte(getErrorCodeStr(0)))
