@@ -61,6 +61,7 @@ const (
 	YAOHAO_NOTICE_ERR_NOT_BIND_DATA                                              //31
 	YAOHAO_NOTICE_ERR_STATUS_NOT_NORMAL                                          //32
 	YAOHAO_NOTICE_ERR_SMS_SERVER_CLOSE                                           //33
+	YAOHAO_NOTICE_ERR_PHONE_BIND_TOO_MANY                                        //34
 )
 
 type YaoHaoNoticeRequireStatus int

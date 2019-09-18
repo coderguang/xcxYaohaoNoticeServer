@@ -97,6 +97,11 @@ func RequireConfirmFromClient(title string, token string, cardType int, code str
 		return yaohaoNoticeDef.YAOHAO_NOTICE_ERR_PHONE, randomCode
 	}
 
+	if !yaohaoNoticeData.CanBindPhone(phone) {
+		sglog.Error("require error phone,bind too many token,title:%s,phone:%s", title, phone)
+		return yaohaoNoticeDef.YAOHAO_NOTICE_ERR_PHONE_BIND_TOO_MANY, randomCode
+	}
+
 	now := sgtime.New()
 
 	if ok, errcode, existData := yaohaoNoticeData.IsDataAlreadyExist(title, token, code, phone); ok {
