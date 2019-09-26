@@ -17,7 +17,7 @@ func SendCommonSms(phone string, signName string, templateCode string, templateP
 	key, secret := yaohaoNoticeData.GetSmsInfo()
 	client, err := sdk.NewClientWithAccessKey("cn-hangzhou", key, secret)
 	if err != nil {
-		sglog.Error("get sms client error,error:%e", err)
+		sglog.Error("get sms client error,error:%s", err)
 		return yaohaoNoticeDef.YAOHAO_NOTICE_ERR_SMS_CLIENT
 	}
 
@@ -42,7 +42,7 @@ func SendCommonSms(phone string, signName string, templateCode string, templateP
 
 	response, err := client.ProcessCommonRequest(request)
 	if err != nil {
-		sglog.Error("send sms to %s,signal:%s,error:%e", phone, signName, err)
+		sglog.Error("send sms to %s,signal:%s,error:%s", phone, signName, err)
 		return yaohaoNoticeDef.YAOHAO_NOTICE_ERR_SMS_PROCESS
 	}
 	result := response.GetHttpContentString()
@@ -73,18 +73,18 @@ func SendConfirmMsg(phone string, randomCode string) yaohaoNoticeDef.YaoHaoNotic
 
 func SendLuckMsg(phone string, code string, timestr string) yaohaoNoticeDef.YaoHaoNoticeError {
 
-	signalName := ""
-	templateCode := ""
-	templateParams := ""
+	signalName := "汽车摇号中签查询"
+	templateCode := "SMS_171751053"
+	templateParams := "{\"name\":\"如你\",\"code\":\"" + code + "\",\"time\":\"" + timestr + "\"}"
 
 	return SendCommonSms(phone, signalName, templateCode, templateParams)
 }
 
 func SendUnLuckMsg(phone string, code string, timestr string, endDt *sgtime.DateTime) yaohaoNoticeDef.YaoHaoNoticeError {
 
-	signalName := ""
-	templateCode := ""
-	templateParams := ""
+	signalName := "汽车摇号中签查询"
+	templateCode := "SMS_171751055"
+	templateParams := "{\"code\":\"" + code + "\"}"
 
 	return SendCommonSms(phone, signalName, templateCode, templateParams)
 }
