@@ -75,7 +75,7 @@ func SendLuckMsg(phone string, code string, timestr string) yaohaoNoticeDef.YaoH
 
 	signalName := "汽车摇号中签查询"
 	templateCode := "SMS_171751053"
-	templateParams := "{\"name\":\"如你\",\"code\":\"" + code + "\",\"time\":\"" + timestr + "\"}"
+	templateParams := "{\"name\":\"\",\"code\":\"" + code + "\",\"time\":\"" + timestr + "\"}"
 
 	return SendCommonSms(phone, signalName, templateCode, templateParams)
 }
